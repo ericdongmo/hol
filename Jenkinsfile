@@ -1,29 +1,31 @@
 pipeline {
     agent any
+    tools {
+        maven 'M2_HOME'
+    }
 
     stages {
-        stage('Hello') {
-            steps {
-                echo 'Hello World'
-                sleep 5
-            }
-        }
+               
          stage('build') {
             steps {
                 echo 'Hello build'
-                sleep 4
+                sh 'mvn clean'
+                sh 'mvn install'
+                sh 'mvn package'
             }
         }
          stage('deploy') {
             steps {
-                echo 'Hello deploy'
-                sleep 3
+                sh 'mvn test'
             }
         }
-         stage('test') {
-            steps {
-                echo 'Hello test'
-                sleep 3
+         stage('buld and publish image') {
+        steps {
+            script {
+                checkout scm
+                docker.withRegistry('', 'dockerUserID') {
+                def customeImage = docker.build("ericdongmo/hol-pipeline:${env.BUILD_ID}")
+                customImage.push()    
             }
         }
                 
